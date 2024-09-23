@@ -1,4 +1,7 @@
 const  express = require('express');
+const Joi = require("joi");
+
+
 
     const books = [
     {
@@ -60,6 +63,11 @@ const  express = require('express');
 
 //display all books
 const app = express();
+
+//apply json middleware
+app.use(express.json());
+
+
 app.get('/api/books', (req, res)=>{
     res.status(200).json(books);
 });
@@ -77,20 +85,36 @@ app.get('/api/books/:id', (req, res)=>{
 
 //adding a book to the books
 app.post('/api/books',(req, res)=>{
-    console.log(req.body)
-    // const book = {
-    //     id: books.length + 1,
-    //     title: req.body.title,
-    //     author: req.body.author,
-    //     published_year: req.body.published_year,
-    //     genres: req.body.genres,
-    //     pages: req.body.pages,
-    //     publisher: req.body.publisher,
-    //     isbn: req.body.isbn,
-    //     availability: req.body.availability
-    // }
-    // books.push(book);
-    // res.status(201).json(book); // 201 ==> created successfully
+    const schema =  Joi.object({
+        title : Joi.string().trim().min(3).max(200).required(),
+        author: Joi.string().trim().min(4).max(50).required(),
+        published_year : Joi.string().trim().min(4).max(4).required(),
+        page : Joi.number().min(10).max(500).required(),
+        publisher : Joi.string().trim().min(5).max(100).required(),
+        isbn : Joi.array().min(3).max(10).required(),
+        genres : Joi.string().trim().min(4).max(40).required(),
+        availability : Joi.boolean().required(),
+
+    })
+    const {error} = schema.validate(req.body);
+    if (error){
+        return res.status(400).json({message : error.details[0].message});
+    }
+
+    const book = {
+        id: books.length + 1,
+        title: req.body.title,
+        author: req.body.author,
+        published_year: req.body.published_year,
+        genres: req.body.genres,
+        pages: req.body.pages,
+        publisher: req.body.publisher,
+        isbn: req.body.isbn,
+        availability: req.body.availability
+    }
+
+    books.push(book);
+    res.status(201).json(book); // 201 ==> created successfully
     res.send("body")
 })
 
