@@ -1,7 +1,8 @@
 const express = require("express");
 const Joi = require("joi");
 const router = express.Router();
-const Author = require('../models/Authors');
+const {Author, validateUpdateAuthor,validateCreatingAuthor} = require('../models/Authors');
+const asycHandler = require('express-async-handler')
 
 // const authors = [
 //     {
@@ -22,10 +23,10 @@ router.use(express.json());
  * @method GET
  * @access public
  */
-router.get('/', async (req, res) => {
+router.get('/', asycHandler(async (req, res) => {
     const authorList = await Author.find();
     res.status(200).json(authorList);
-});
+}));
 
 /**
  * @desc Get author by id
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
  * @access public
  */
 router.get('/:id', (req, res) => {
-    const author = authors.find(a => a.id === parseInt(req.params.id));
+    const author = Author.findById(req.params.id);
     if (author) {
         res.status(200).json(author);
     } else {
@@ -48,27 +49,20 @@ router.get('/:id', (req, res) => {
  * @method POST
  * @access public
  */
-router.post('/', async (req, res) => {
+router.post('/', asycHandler(async (req, res) => {
     const { error } = validateCreatingAuthor(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-
-   try{
-       const author = new Author({
-           firstName: req.body.firstName,
-           lastName: req.body.lastName,
-           nationality: req.body.nationality,
-           image: req.body.image || "default-image.png",
-       });
-       const result = await author.save();
-       res.status(201).json(result); // 201 ==> created successfully
-
-   }catch (error){
-        console.log(error);
-        res.status(500).json({message : error})
-   }
-});
+    const author = new Author({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        nationality: req.body.nationality,
+        image: req.body.image || "default-image.png",
+    });
+    const result = await author.save();
+    res.status(201).json(result); // 201 ==> created successfully
+}));
 
 /**
  * @desc Update an author
@@ -76,24 +70,35 @@ router.post('/', async (req, res) => {
  * @method PUT
  * @access public
  */
-router.put('/:id', (req, res) => {
+router.put('/:id', asycHandler(async (req, res) => {
+    // Validate the incoming request data
     const { error } = validateUpdateAuthor(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
+    // Find the author by ID and update with new data
+    const author = await Author.findByIdAndUpdate(
+        req.params.id,
+        {
+            $set: {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                nationality: req.body.nationality,
+                image: req.body.image || 'default-image.png', // Add a fallback default image
+            },
+        },
+        { new: true } // Return the updated document
+    );
 
-    const author = authors.find(a => a.id === parseInt(req.params.id));
-    if (author) {
-        author.firstName = req.body.firstName || author.firstName;
-        author.lastName = req.body.lastName || author.lastName;
-        author.nationality = req.body.nationality || author.nationality;
-        author.image = req.body.image || author.image;
-
-        res.status(200).json({ message: "Author has been updated!" });
-    } else {
-        res.status(404).json({ message: "Author not found!" });
+    // If author is not found, return 404 error
+    if (!author) {
+        return res.status(404).json({ message: "Author not found" });
     }
-});
+
+    // Return the updated author details
+    res.status(200).json(author);
+}));
+
 
 /**
  * @desc Delete an author
@@ -101,38 +106,15 @@ router.put('/:id', (req, res) => {
  * @method DELETE
  * @access public
  */
-router.delete('/:id', (req, res) => {
-    const index = authors.findIndex(a => a.id === parseInt(req.params.id));
-    if (index !== -1) {
-        authors.splice(index, 1);
+router.delete('/:id', asycHandler(async(req, res) => {
+    const author = await Author.findById(req.params.id);
+    if (author) {
+        await Author.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: "Author has been deleted!" });
     } else {
         res.status(404).json({ message: "Author not found!" });
     }
-});
+}));
 
-// Validation for creating author
-function validateCreatingAuthor(author) {
-    const schema = Joi.object({
-        firstName: Joi.string().trim().min(3).max(50).required(),
-        lastName: Joi.string().trim().min(3).max(50).required(),
-        nationality: Joi.string().trim().min(2).max(50).required(),
-        image: Joi.string().trim().min(5).max(255).optional(),
-    });
-
-    return schema.validate(author);
-}
-
-// Validation for updating author
-function validateUpdateAuthor(author) {
-    const schema = Joi.object({
-        firstName: Joi.string().trim().min(3).max(50),
-        lastName: Joi.string().trim().min(3).max(50),
-        nationality: Joi.string().trim().min(2).max(50),
-        image: Joi.string().trim().min(5).max(255),
-    });
-
-    return schema.validate(author);
-}
 
 module.exports = router;

@@ -34,5 +34,33 @@ const  AuthorSchema = new mongoose.Schema({
     timestamps : true,
 });
 
+// Validation for creating author
+function validateCreatingAuthor(author) {
+    const schema = Joi.object({
+        firstName: Joi.string().trim().min(3).max(50).required(),
+        lastName: Joi.string().trim().min(3).max(50).required(),
+        nationality: Joi.string().trim().min(2).max(50).required(),
+        image: Joi.string().trim().min(5).max(255).optional(),
+    });
+
+    return schema.validate(author);
+}
+
+// Validation for updating author
+function validateUpdateAuthor(author) {
+    const schema = Joi.object({
+        firstName: Joi.string().trim().min(3).max(50),
+        lastName: Joi.string().trim().min(3).max(50),
+        nationality: Joi.string().trim().min(2).max(50),
+        image: Joi.string().trim().min(5).max(255),
+    });
+
+    return schema.validate(author);
+}
+
 const Author  = mongoose.model("Author", AuthorSchema);
-module.exports = Author;
+module.exports = {
+    Author,
+    validateCreatingAuthor,
+    validateUpdateAuthor
+};
