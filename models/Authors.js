@@ -1,6 +1,7 @@
 const  mongoose = require('mongoose');
 const {string} = require("joi");
 const {models} = require("mongoose");
+const Joi = require('joi');
 
 const  AuthorSchema = new mongoose.Schema({
     firstName: {

@@ -34,14 +34,14 @@ router.get('/', asycHandler(async (req, res) => {
  * @method GET
  * @access public
  */
-router.get('/:id', (req, res) => {
-    const author = Author.findById(req.params.id);
+router.get('/:id', asycHandler(async (req, res) => {
+    const author = await  Author.findById(req.params.id);
     if (author) {
         res.status(200).json(author);
     } else {
         res.status(404).json({ message: "Author not found" });
     }
-});
+}));
 
 /**
  * @desc Create new author
