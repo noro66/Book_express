@@ -1,17 +1,17 @@
 const express = require("express");
 const Joi = require("joi");
-
 const router = express.Router();
+const Author = require('../models/Authors');
 
-const authors = [
-    {
-        id: 1,
-        firstName: "mohamed",
-        lastName: "lboftini",
-        nationality: "lebanon",
-        image: "default-image.png"
-    },
-];
+// const authors = [
+//     {
+//         id: 1,
+//         firstName: "mohamed",
+//         lastName: "lboftini",
+//         nationality: "lebanon",
+//         image: "default-image.png"
+//     },
+// ];
 
 // Apply JSON middleware
 router.use(express.json());
@@ -22,8 +22,9 @@ router.use(express.json());
  * @method GET
  * @access public
  */
-router.get('/', (req, res) => {
-    res.status(200).json(authors);
+router.get('/', async (req, res) => {
+    const authorList = await Author.find();
+    res.status(200).json(authorList);
 });
 
 /**
@@ -47,22 +48,26 @@ router.get('/:id', (req, res) => {
  * @method POST
  * @access public
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const { error } = validateCreatingAuthor(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
 
-    const author = {
-        id: authors.length + 1,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        nationality: req.body.nationality,
-        image: req.body.image || "default-image.png",
-    };
+   try{
+       const author = new Author({
+           firstName: req.body.firstName,
+           lastName: req.body.lastName,
+           nationality: req.body.nationality,
+           image: req.body.image || "default-image.png",
+       });
+       const result = await author.save();
+       res.status(201).json(result); // 201 ==> created successfully
 
-    authors.push(author);
-    res.status(201).json(author); // 201 ==> created successfully
+   }catch (error){
+        console.log(error);
+        res.status(500).json({message : error})
+   }
 });
 
 /**
