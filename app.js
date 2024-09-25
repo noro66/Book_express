@@ -12,14 +12,20 @@ dotenv.config();
 const app = express();
 mongoose.connect(process.env.MONGO_URL)
     .then(()=> console.log("connected  To Mongodb..."))
-    .catch(error => console.log("connection failed  To MongoDB", error))
+    .catch(error => console.log("connection failed  To MongoDB", error));
+
 
 //costume middleware
 app.use(logger);
 //Routes
 app.use("/api/books", booksPath);
 app.use("/api/authors", authorsPath);
-
+app.use((err, req, res, next) => {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode).json({
+        message: err.message,
+    });
+});
 
 
 //lunching the server
