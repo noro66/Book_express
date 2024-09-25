@@ -4,11 +4,12 @@ const  express = require('express');
 const booksPath = require('./routes/books')
 const authorsPath = require('./routes/authors')
 const mongoose = require("mongoose");
-
+const dotenv = require('dotenv');
+dotenv.config();
 
 
 const app = express();
-mongoose.connect("mongodb://localhost/bookStoreDB")
+mongoose.connect(process.env.MONGO_URL)
     .then(()=> console.log("connected  To Mongodb..."))
     .catch(error => console.log("connection failed  To MongoDB", error))
 //Routes
@@ -17,5 +18,5 @@ app.use("/api/authors", authorsPath);
 
 
 //lunching the server
-const PORT = 3000;
-app.listen(PORT, ()=> console.log(`Service is running in port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, ()=> console.log(`Service is running in ${process.env.NODE_ENV} port ${PORT}`));
