@@ -3,6 +3,8 @@ const  express = require('express');
 //router path
 const booksPath = require('./routes/books')
 const authorsPath = require('./routes/authors')
+const authPath = require('./routes/auth')
+const  {User, validateUserLogin, validateUserRegister, validateUserUpdate} = require('./models/User')
 const mongoose = require("mongoose");
 const dotenv = require('dotenv');
 const logger = require("./middlewares/logger");
@@ -16,11 +18,13 @@ mongoose.connect(process.env.MONGO_URL)
     .catch(error => console.log("connection failed  To MongoDB", error));
 
 
-//costume middleware
+// costume middleware
 app.use(logger);
-//Routes
+// Routes
+app.use(express.json());
 app.use("/api/books", booksPath);
 app.use("/api/authors", authorsPath);
+app.use("/api/auth", authPath);
 app.use(notFound)
 app.use(errorHandler);
 
