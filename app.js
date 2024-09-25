@@ -6,6 +6,7 @@ const authorsPath = require('./routes/authors')
 const mongoose = require("mongoose");
 const dotenv = require('dotenv');
 const logger = require("./middlewares/logger");
+const {notFound, errorHandler} = require("./middlewares/notFound");
 dotenv.config();
 
 
@@ -20,12 +21,8 @@ app.use(logger);
 //Routes
 app.use("/api/books", booksPath);
 app.use("/api/authors", authorsPath);
-app.use((err, req, res, next) => {
-    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-    res.status(statusCode).json({
-        message: err.message,
-    });
-});
+app.use(notFound)
+app.use(errorHandler);
 
 
 //lunching the server
