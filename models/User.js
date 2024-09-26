@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require('joi');
 
-
+//User Schema
 const UserSchema = mongoose.Schema({
     email: {
         type : String,
@@ -30,7 +30,6 @@ const UserSchema = mongoose.Schema({
         default : false
     }
 }, {timestamps : true});
-const User = mongoose.model('User', UserSchema);
 //User login validation
 function  validateUserLogin(obj){
     const schema = Joi.object({
@@ -61,4 +60,7 @@ function  validateUserUpdate(obj){
     });
     return schema.validate(obj);
 }
+
+const User = mongoose.model('User', UserSchema);
+
 module.exports = {User, validateUserLogin, validateUserRegister, validateUserUpdate};

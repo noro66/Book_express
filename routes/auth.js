@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const asyncHandler = require('express-async-handler')
-const {User, validateUserRegister,validateUserLogin, validateUserUpdate} = require("../models/User");
 const bcrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken")
+const {User, validateUserRegister,validateUserLogin} = require("../models/User");
 /**
  * @desc Register New User
  * @route /api/auth/register
@@ -29,7 +30,7 @@ router.post('/register', asyncHandler(async (req,res)=>{
         isAdmin : req.body.isAdmin
     });
     const result = await user.save();
-    const token = null;
+    const token = jwt.sign({id : user._id, username : user.username, isAdmin: user.isAdmin}, process.env.JWT_SECRET_KEY, {expiredAt : "1d"});
     const {password, ...other} = result._doc;
     res.status(201).json({...other, token});
 }));
@@ -48,14 +49,14 @@ router.post('/login', asyncHandler(async (req,res)=>{
     }
     let user = await User.findOne({ email: req.body.email });
     if (!user){
-        return res.status(400).json ({message : "invalid Email !"})
+        return res.status(400).json ({message : "invalid Email or password!"})
     }
     const isPasswordMatch = await  bcrypt.compare(req.body.password, user.password);
     if (!isPasswordMatch){
-        return res.status(400).json ({message : "invalid Password !"})
+        return res.status(400).json ({message : "invalid email or Password !"})
     }
 
-    const token = null;
+    const token = jwt.sign({id : user._id, username : user.username, isAdmin: user.isAdmin}, process.env.JWT_SECRET_KEY);
     const {password, ...other} = user._doc;
     res.status(201).json({...other, token});
 }));
