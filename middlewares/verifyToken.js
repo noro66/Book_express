@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 
+//verify token
 function  verifyToken(req, res, next) {
     const token  = req.headers.token;
     if (token){
@@ -13,6 +14,8 @@ function  verifyToken(req, res, next) {
        return res.status(401).json({message : "No Token provided"})
     }
 }
+
+//middleware for admin or the user himself
 function verifyTokenAndAuthorization(req, res, next){
     verifyToken(req, res, ()=>{
         if (req.user.id === req.params.id || req.user.isAdmin){
@@ -23,9 +26,10 @@ function verifyTokenAndAuthorization(req, res, next){
     })
 }
 
+//middleware for only Admin
 function verifyTokenAndAdmin(req, res, next){
     verifyToken(req, res, ()=>{
-        if (req.user.id === req.params.id || req.user.isAdmin){
+        if (req.user.isAdmin){
             next();
         }else {
             return res.status(403).json({message : "You are not allowed Only Admin"})

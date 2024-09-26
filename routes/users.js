@@ -3,7 +3,7 @@ const router = express.Router();
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcryptjs');
 const  {User, validateUserUpdate} = require('../models/User');
-const {verifyToken, verifyTokenAndAdmin} = require('../middlewares/verifyToken')
+const {verifyToken, verifyTokenAndAdmin, verifyTokenAndAuthorization} = require('../middlewares/verifyToken')
 /**
  * @desc Update User
  * @route /api/users/:id
@@ -39,9 +39,39 @@ router.put('/:id', verifyToken,  asyncHandler(async (req, res)=>{
  * @method GET
  * @access private (ONLY ADMIN)
  */
-
 router.get('/', verifyTokenAndAdmin, asyncHandler( async  (req, res)=>{
     const users = await  User.find();
     res.status(200).json(users);
 }))
+
+/**
+ * @desc Get User Profile
+ * @route /api/users/:id
+ * @method GET
+ * @access private (User or  ADMIN)
+ */
+router.get('/:id',verifyTokenAndAuthorization,  asyncHandler(async ()=>{
+    const user = await  User.findById(req.body.id).select('-password');
+    if (user){
+        res.status(200).json(user);
+    }else{
+        res.status(400).json({message: "user not found"})
+    }
+}));
+
+/**
+ * @desc Get User Profile and delete it
+ * @route /api/users/:id
+ * @method DELETE
+ * @access private (User or  ADMIN)
+ */
+router.delete('/:id', verifyTokenAndAuthorization,  asyncHandler(async (req, res)=>{
+    const user = await  User.findById(req.params.id).select('-password');
+    if (user){
+        await  User.findByIdAndDelete(req.params.id);
+        res.status(200).json({message: "user has been deleted successfully"});
+    }else{
+        res.status(400).json({message: "user not found"})
+    }
+}));
 module.exports = router;

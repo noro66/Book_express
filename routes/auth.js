@@ -82,6 +82,8 @@ router.post('/login', asyncHandler(async (req, res) => {
 
     // Exclude the password from the response
     const { password, ...other } = user._doc;
+
+    //Send response to the client
     res.status(200).json({ ...other, token });
 }));
 
