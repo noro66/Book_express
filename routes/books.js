@@ -5,13 +5,13 @@ const router = express.Router();
 
 
 //apply json middleware
-router.use(express.json());
+router.use(express.json())
 
-router.get('/', getAllBooks);
+router.get('/', getAllBooks)
 
 router.get('/:id', getBookById)
 
-router.post('/', verifyTokenAndAdmin,  createBook);
+router.post('/', verifyTokenAndAdmin,  createBook)
 
 router.put("/:id", verifyTokenAndAdmin, updateBook)
 
