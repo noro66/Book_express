@@ -33,4 +33,15 @@ router.put('/:id', verifyToken,  asyncHandler(async (req, res)=>{
     res.status(200).json({updatedUSer});
 }));
 
+/**
+ * @desc Get All Users
+ * @route /api/users
+ * @method GET
+ * @access private (ONLY ADMIN)
+ */
+
+router.get('/', asyncHandler( async  (req, res)=>{
+    const users = await  User.find();
+    res.status(200).json(users);
+}))
 module.exports = router;
