@@ -39,10 +39,7 @@ router.post('/register', asyncHandler(async (req, res) => {
     const result = await user.save();
 
     // Generate a JWT token
-    const token = jwt.sign(
-        { id: user._id, username: user.username, isAdmin: user.isAdmin },
-        process.env.JWT_SECRET_KEY
-    );
+    const token = user.generateToken();
 
     // Exclude the password from the response
     const { password, ...other } = result._doc;
@@ -75,10 +72,7 @@ router.post('/login', asyncHandler(async (req, res) => {
     }
 
     // Generate a JWT token
-    const token = jwt.sign(
-        { id: user._id, username: user.username, isAdmin: user.isAdmin },
-        process.env.JWT_SECRET_KEY
-    );
+    const token = user.generateToken();
 
     // Exclude the password from the response
     const { password, ...other } = user._doc;

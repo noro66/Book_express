@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require('joi');
+const jwt = require("jsonwebtoken");
 
 //User Schema
 const UserSchema = mongoose.Schema({
@@ -30,6 +31,16 @@ const UserSchema = mongoose.Schema({
         default : false
     }
 }, {timestamps : true});
+
+//Generate Token
+UserSchema.methods.generateToken  = function (){
+    return jwt.sign(
+        { id: this._id, isAdmin: this.isAdmin },
+        process.env.JWT_SECRET_KEY
+    )
+}
+
+
 //User login validation
 function  validateUserLogin(obj){
     const schema = Joi.object({
