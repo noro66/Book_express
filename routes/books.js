@@ -3,18 +3,15 @@ const {getAllBooks, getBookById, createBook, updateBook, deleteBook} = require("
 const {verifyTokenAndAdmin} = require("../middlewares/verifyToken");
 const router = express.Router();
 
-
 //apply json middleware
 router.use(express.json())
 
-router.get('/', getAllBooks)
+router.route('/')
+    .get(getAllBooks)
+    .post( verifyTokenAndAdmin,  createBook)
 
-router.get('/:id', getBookById)
-
-router.post('/', verifyTokenAndAdmin,  createBook)
-
-router.put("/:id", verifyTokenAndAdmin, updateBook)
-
-router.delete("/:id", verifyTokenAndAdmin,  deleteBook)
+router.route('/id')
+    .get( getBookById).put(verifyTokenAndAdmin, updateBook)
+    .delete( verifyTokenAndAdmin,  deleteBook)
 
 module.exports = router;

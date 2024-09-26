@@ -1,7 +1,12 @@
 const asycHandler = require("express-async-handler");
 const {Author, validateCreatingAuthor, validateUpdateAuthor} = require("../models/Authors");
 
-
+/**
+ * @desc Get all authors
+ * @route /api/authors
+ * @method GET
+ * @access public
+ */
 const getAllAuthors = asycHandler(async (req, res) => {
     const {pageNumber} = req.query;
     const authorsPerPage  = 2;
@@ -10,6 +15,12 @@ const getAllAuthors = asycHandler(async (req, res) => {
     res.status(200).json(authorList);
 })
 
+/**
+ * @desc Get author by id
+ * @route /api/authors/:id
+ * @method GET
+ * @access public
+ */
 const getAuthorById = asycHandler(async (req, res) => {
     const author = await  Author.findById(req.params.id);
     if (author) {
@@ -19,6 +30,12 @@ const getAuthorById = asycHandler(async (req, res) => {
     }
 })
 
+/**
+ * @desc Create new author
+ * @route /api/authors
+ * @method POST
+ * @access private (only admin)
+ */
 const creteAuthor = asycHandler(async (req, res) => {
     const { error } = validateCreatingAuthor(req.body);
     if (error) {
@@ -34,6 +51,12 @@ const creteAuthor = asycHandler(async (req, res) => {
     res.status(201).json(result); // 201 ==> created successfully
 })
 
+/**
+ * @desc Update an author
+ * @route /api/authors/:id
+ * @method PUT
+ * @access private (only admin)
+ */
 const updateAuhtor = asycHandler(async (req, res) => {
     // Validate the incoming request data
     const { error } = validateUpdateAuthor(req.body);
@@ -63,6 +86,12 @@ const updateAuhtor = asycHandler(async (req, res) => {
     res.status(200).json(author);
 })
 
+/**
+ * @desc Delete an author
+ * @route /api/authors/:id
+ * @method DELETE
+ * @access private (only admin)
+ */
 const deleteAuthor = asycHandler(async(req, res) => {
     const author = await Author.findById(req.params.id);
     if (author) {
